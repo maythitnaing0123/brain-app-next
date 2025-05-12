@@ -12,6 +12,7 @@ import {
 import { api, internal } from "./_generated/api";
 import { GoogleGenAI } from "@google/genai";
 import { Id } from "./_generated/dataModel";
+import { embed } from "./notes";
 
 //to upload url.
 export const generateUploadUrl = mutation({
@@ -118,9 +119,14 @@ export const fillInDescription = internalAction({
 
       let responseBySystem = response.text ?? "Can't generate a response...";
 
+   
+
+      let embedding = await embed(responseBySystem);
+
       await ctx.runMutation(internal.document.updateDocumentDescription, {
         documentId: args.documentId,
         description: responseBySystem,
+        embedding 
       });
 
 
@@ -134,10 +140,12 @@ export const updateDocumentDescription = internalMutation({
   args: {
     documentId: v.id("documents"),
     description: v.string(),
+    embedding : v.array(v.number())
   },
   handler: async (ctx, args) => {
     return ctx.db.patch(args.documentId , {
-      description: args.description
+      description: args.description,
+      embedding : args.embedding 
     });
   },
 });

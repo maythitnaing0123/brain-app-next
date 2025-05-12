@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@c/src/lib/utils";
-import { File, NotebookTabs, Settings } from "lucide-react";
+import { File, NotebookTabs, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,6 +12,19 @@ const pathname = usePathname();
     return (
         <nav>
         <ul className="space-y-4">
+
+             {/* one links */}
+             <li>
+            <Link href="/dashboard/search" 
+            className={cn("flex gap-2 hover:text-cyan-300" , {
+              "text-cyan-300" : pathname.endsWith("/documents") || pathname.includes("/documents") 
+            })}>
+              <Search />Search</Link>
+          </li>
+
+
+
+
           {/* one links */}
           <li>
             <Link href="/dashboard/documents" 

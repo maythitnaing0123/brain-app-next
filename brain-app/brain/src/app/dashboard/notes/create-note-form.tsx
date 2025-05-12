@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
 
 const formSchema = z.object({
-  text: z.string().min(1).max(2500),
+  text: z.string().min(1).max(5000),
 })
 
 

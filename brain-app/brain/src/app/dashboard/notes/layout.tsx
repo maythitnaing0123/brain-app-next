@@ -26,22 +26,23 @@ export default function NodeLayouts({ children }: { children: ReactNode }) {
         </div>
 
 
-       <div className="flex gap-12">
+       <div className="flex gap-10">
 
         <ul className="space-y-2">
+            {getNotes === undefined && <div className="flex justify-center mt-5 items-center">Loading</div>}
             {getNotes?.map(note => (
-            <li key={note._id} className={cn(`text-xl hover:text-cyan-200`, {
+            <li key={note._id} className={cn(`text-lg hover:text-cyan-200`, {
                 'text-cyan-200': note._id === noteId
             })}>
                 <Link href={`/dashboard/notes/${note._id}`}>
-                    {note.text.substring(0, 20) + "..."}
+                    { note.text.substring(0, 20) + "..."}
                 </Link>
             </li>
 
         )
         )}
         </ul>
-        <div className="bg-slate-800 rounded p-4 w-full">{children}</div>
+        {getNotes != undefined && getNotes?.length > 0 && <div className="bg-slate-900 rounded p-4 w-full">{children}</div>}
         </div>
 
     </main>

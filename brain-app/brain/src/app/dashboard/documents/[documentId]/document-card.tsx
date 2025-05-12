@@ -21,7 +21,7 @@ export function DocumentCard({
                 <CardTitle className="fond-bold text-2xl">{document.title}</CardTitle>
             </CardHeader>
             <CardContent>
-                <p>{document.description}</p>
+                <p>{document.description ? document.description : "loading..."}</p>
             </CardContent>
             <CardFooter>
                 <Button

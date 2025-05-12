@@ -87,7 +87,7 @@ export const getNotes = query({
 
 
 
-async function embed(text: string){
+export async function embed(text: string){
 
     const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API });
     

@@ -23,7 +23,7 @@ export default function DocumentPage({ params }:
 
 
     return (
-        <main className=" pb-0 space-y-8 ">
+        <main className="pb-0 space-y-8 ">
 
             {
                 document === undefined && !Array.isArray(document) &&
