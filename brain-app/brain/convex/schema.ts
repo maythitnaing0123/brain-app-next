@@ -16,8 +16,14 @@ export default defineSchema({
    }).index("by_documentId_tokenIdentifier" , ["documentId" ,"tokenIdentifier"]),
    notes: defineTable({
     text: v.string(),
-    tokenIdentifier: v.string()
+    tokenIdentifier: v.string(),
+    embedding: v.optional(v.array(v.number())),
    }).index("by_tokenIdentifier" , ["tokenIdentifier"])
+   .vectorIndex("by_embedding", {
+    vectorField: "embedding",
+    dimensions: 1536,
+    filterFields: ["tokenIdentifier"],
+  }),
 
 
 });
