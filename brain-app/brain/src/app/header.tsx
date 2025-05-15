@@ -5,10 +5,11 @@ import Image from "next/image";
 import { HeaderActions } from "./header-action";
 import { ModeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
+import { OrganizationSwitcher } from '@clerk/nextjs'
 
 
 export function Header() {
-    return <div className="bg-slate-900 py-4">
+    return <div className="dark:bg-slate-900 py-4 shadow-sm">
         <div className="container mx-auto flex justify-between items-center">
 
             <div className="flex items-center space-x-9">
@@ -20,6 +21,9 @@ export function Header() {
                 className="rounded "/>
                 BIGBIN
                 </Link>
+
+                
+                <OrganizationSwitcher/>
 
 
                 <Link href="/dashboard/documents" className="flex items-center">
@@ -35,8 +39,10 @@ export function Header() {
             <ModeToggle />
                <HeaderActions/>
             </div>
+       
 
         </div>
+      
 
     </div>
 

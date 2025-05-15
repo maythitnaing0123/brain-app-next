@@ -66,7 +66,7 @@ export function SearchForm(
     return (
         <Form {...form}  >
             <form 
-             className="flex space-y-8  
+             className="flex
              gap-1"
             onSubmit={form.handleSubmit(onSubmit)} 
            >

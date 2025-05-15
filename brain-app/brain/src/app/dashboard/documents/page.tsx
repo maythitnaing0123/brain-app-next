@@ -7,12 +7,19 @@ import { DocumentCard } from "./[documentId]/document-card";
 import { UploadDocumentButton } from "./[documentId]/upload-document-button";
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card";
+import { useAuth, useOrganization } from "@clerk/nextjs";
 
 
 
 export default function Home() {
 
-  const getDocument = useQuery(api.document.getDocument)
+  // current click member
+
+  const { orgId } = useAuth()
+
+  const getDocument = useQuery(api.document.getDocument , {
+    orgId: orgId ?? undefined
+  })
 
 
   return (

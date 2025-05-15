@@ -20,7 +20,8 @@ import { Loader2 } from "lucide-react"
 import { LoadingButton } from "@/components/loadingButton"
 import { generateUploadUrl } from "../../../../../convex/document"
 import { Id } from "../../../../../convex/_generated/dataModel"
-import { toast } from "sonner"
+import { useAuth } from "@clerk/nextjs"
+import toast from "react-hot-toast"
 
 const formSchema = z.object({
   title: z.string().min(1).max(250),
@@ -33,7 +34,7 @@ export default function UploadDocumentForm({ onUpload }: { onUpload: () => void 
   const createDocument = useMutation(api.document.createDocument)
   const generateUploadUrl = useMutation(api.document.generateUploadUrl);
   const { isAuthenticated } = useConvexAuth();
-
+  const { orgId } = useAuth()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,6 +69,7 @@ export default function UploadDocumentForm({ onUpload }: { onUpload: () => void 
         await createDocument({
          title: values.title,
          fileId : storageId as Id<"_storage">,
+         orgId: orgId ?? undefined
    
         });
 

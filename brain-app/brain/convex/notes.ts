@@ -2,6 +2,8 @@ import { ConvexError, v } from "convex/values";
 import { internalAction, internalMutation, mutation, query } from "./_generated/server";
 import { GoogleGenAI } from "@google/genai";
 import { internal } from "./_generated/api";
+import { hasOrgAccess } from "./document";
+import { Id } from "./_generated/dataModel";
 
 export const getNote = query({
 
@@ -12,7 +14,6 @@ export const getNote = query({
    
     async handler(ctx , args){
 
-        console.log("server" , typeof args.noteId)
     const auth = (await ctx.auth.getUserIdentity())?.tokenIdentifier
 
     if(!auth){
@@ -69,21 +70,44 @@ export const deleteNote = mutation({
 
 
 export const getNotes = query({
+    args:{
+        orgId : v.optional(v.string())
+    },
 
-    async handler(ctx){
+    async handler(ctx , args){
     const auth = (await ctx.auth.getUserIdentity())?.tokenIdentifier
 
+    
     if(!auth){
         return null
     }
 
-    return await ctx.db.query("notes")
-    .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", auth))
-    .order("desc").collect();
+   
+    if (args.orgId) {
+        const hasAccess = await hasOrgAccess(ctx, args.orgId);
+  
+        if (!hasAccess) {
+          return null;
+        }
+  
+        const notes = await ctx.db
+          .query("notes")
+          .withIndex("by_orgsId", (q) => q.eq("orgsId", args.orgId))
+          .collect();
+  
+        return notes;
+      } else {
+        const notes = await ctx.db
+          .query("notes")
+          .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", auth))
+          .order("desc")
+          .collect();
+  
+        return notes;
+      }
+    },
+  });
 
-
-   } 
-})
 
 
 
@@ -154,7 +178,9 @@ export const createNoteEmdding = internalAction({
 //create notes
 export const createNote = mutation({
     args: {
-        text: v.string()
+        text: v.string(),
+        orgId: v.optional(v.string()),
+
     },
     handler : async(ctx , args) => {
 
@@ -165,14 +191,33 @@ export const createNote = mutation({
             throw new ConvexError("Unauthorized! , You must login")
         }
 
-
-        const noteId = await ctx.db.insert("notes" , {
-            text: args.text,
-            tokenIdentifier: auth,
-          
+        console.log(auth)
 
 
-        });
+        let noteId: Id<"notes">;
+
+
+        if(args.orgId){
+
+            const hasAccess = await hasOrgAccess(ctx , args.orgId)
+
+    
+            if(!hasAccess){
+                return null;
+            }
+    
+             noteId = await ctx.db.insert("notes" , {
+                text: args.text,
+                orgsId: args.orgId!,
+                tokenIdentifier : auth
+            })
+        }else{
+
+             noteId = await ctx.db.insert("notes" , {
+                text: args.text,
+                tokenIdentifier: auth, });
+            
+        }  
 
 
         if(!noteId){

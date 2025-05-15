@@ -5,7 +5,8 @@ import { Authenticated, Unauthenticated, AuthLoading, useQuery, useMutation } fr
 
 export function HeaderActions() {
     return <> <Unauthenticated>
-        <SignInButton />
+
+        <div className="cursor-pointer"><SignInButton /></div>
     </Unauthenticated>
         <Authenticated>
             <div className="flex gap-4">

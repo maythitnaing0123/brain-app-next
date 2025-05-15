@@ -21,22 +21,69 @@ export const generateUploadUrl = mutation({
   },
 });
 
+
+export async function hasOrgAccess(ctx : MutationCtx | QueryCtx , orgId: string) {
+  
+  const userId = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
+
+  if(!userId){
+    return false;
+  }
+
+  const members = await ctx.db.query("memberships"). 
+  withIndex("by_orgsId_by_users" , q => q.eq("orgsId" , orgId).eq("users" , userId)).first()
+
+
+  console.log("members" , members)
+
+  return !!members;
+
+
+
+} 
+
 // one table - accept all fun.
 //get,update,delete.
 
 export const getDocument = query({
-  args: {},
-  async handler(ctx) {
+
+  args: {orgId : v.optional(v.string())},
+
+  async handler(ctx , args) {
     const userId = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
 
     if (!userId) {
-      return [];
+      return null;
     }
+    
 
-    return await ctx.db
+    if(args.orgId){
+
+      //has members.
+      const isMember = await hasOrgAccess(ctx,args.orgId)
+
+      if(!isMember){
+        return null;
+      }
+      
+      return await ctx.db
+      .query("documents")
+      .withIndex("by_orgsId", (q) => q.eq("orgsId", args.orgId))
+      .collect();
+   
+
+    }else{
+
+      return await ctx.db
       .query("documents")
       .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", userId))
       .collect();
+
+    }
+
+
+
+    
   },
 });
 
@@ -155,20 +202,48 @@ export const createDocument = mutation({
   args: {
     title: v.string(),
     fileId: v.id("_storage"),
+    orgId: v.optional(v.string()),
+
   },
   handler: async (ctx, args) => {
     const userId = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
 
     if (!userId) {
       throw new ConvexError("Not Authenticated");
+
+      
     }
 
-   const documentId =  await ctx.db.insert("documents", {
-      title: args.title,
-      tokenIdentifier: userId,
-      fileId: args.fileId,
-      description: "",
-    });
+    let documentId : Id<"documents">;
+
+      if(args.orgId){
+    
+                const hasAccess = await hasOrgAccess(ctx , args.orgId)
+    
+        
+                if(!hasAccess){
+                    return null;
+                }
+                 documentId =  await ctx.db.insert("documents", {
+                  title: args.title,
+                  orgsId: args.orgId,
+                  tokenIdentifier: userId,
+                  fileId: args.fileId,
+                  description: "",
+                });
+            }else{
+    
+               documentId =  await ctx.db.insert("documents", {
+                title: args.title,
+                tokenIdentifier: userId,
+                fileId: args.fileId,
+                description: "",
+              });
+                
+            }  
+    
+
+ 
 
     if(!documentId){
       return null
@@ -180,6 +255,10 @@ export const createDocument = mutation({
     })
   },
 });
+
+
+
+
 
 export const askQuestion = action({
   args: {

@@ -17,10 +17,11 @@ import { useMutation , useConvexAuth } from "convex/react"
 import { api } from "@c/convex/_generated/api"
 
 import { LoadingButton } from "@/components/loadingButton"
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
+import { useAuth, useOrganization } from "@clerk/nextjs"
 
 const formSchema = z.object({
   text: z.string().min(1).max(5000),
@@ -30,7 +31,9 @@ const formSchema = z.object({
 export default function UploadNotesForm({ onNoteUpload }: { onNoteUpload: () => void }) {
   
   const { isAuthenticated } = useConvexAuth();
+  const { orgId } = useAuth()
   const createNodes = useMutation(api.notes.createNote)
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,16 +47,21 @@ export default function UploadNotesForm({ onNoteUpload }: { onNoteUpload: () => 
   async function onSubmit(values: z.infer<typeof formSchema>) {
 
 
+
+
     if(!isAuthenticated){
 
       toast.error("Please Login!");
+     
+
 
       return 
 
     }
     try {
 
-      await createNodes({ text: values.text });
+
+      await createNodes({ text: values.text , orgId : orgId!});
       
       toast.success("Successfully created!");
       
